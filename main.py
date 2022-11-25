@@ -1,8 +1,7 @@
 import sys
 from get_args import load_args
 from parse_var import parse_var
-from parse_ep import parse_ep
-
+import custom_eval
 file,lpbrk,LOOPLIMIT, debug  = load_args()
 
 def stop(msg):
@@ -19,22 +18,38 @@ def getvar(name):
   return vars_[name]
 def run(code):
   tokens = code.split("\n")
+  
   for tkn in tokens:
     if tkn.startswith('var'):
       splt = tkn.split(" ",1)[1]
-      name = (splt.split('=')[0].strip())
-      val= (splt.split('=')[1].strip())
-      
-      if isinstance(parse_var(val),dict):
-        funcs[name] = parse_var(val)
-      else:
-        setvar(name,parse_var(val))
-    if tkn.startswith('execpy'):    
-      c = parse_ep(tkn) 
-      if c[0] == '$':
-        exec(getvar(c[1:]))
+      name = (splt.split('=',1)[0].strip())
+      val= (splt.split('=',1)[1].strip())
+      pv = parse_var(val)
+      if pv is None: continue
+      if isinstance(pv,dict):
         
+        funcs[name] = pv
+        
+      elif isinstance(pv,str) and pv.startswith("#"):
+        
+        v = pv[2:][:-1]
+        for k,va in vars_.items():
+          v = v.replace(f"${k}",str(va))
+        setvar(name,custom_eval.custom_eval(v))
       else:
-        exec(c)
-    
+        setvar(name,pv)
+    elif tkn.startswith("call"):
+      fnname =  tkn[tkn.index("call ")+4: tkn.index("(")].strip()
+      args = tkn[tkn.index("(")+1: tkn.index(")")].split(',')
+      
+      cd = funcs[fnname]["code"]
+      fn_args = funcs[fnname]["args"]
+      for ar in range(len(fn_args)):
+        arg = fn_args[ar]
+        cd = cd.replace("$"+arg,args[ar])
+      for vrn,vrv in vars_.items():
+        cd = cd.replace(f"${vrn}",str(vrv))  
+      run(cd.replace(";","\n"))
+      
+      
 run(cde)
