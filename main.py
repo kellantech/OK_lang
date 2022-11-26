@@ -2,6 +2,7 @@ import sys
 from get_args import load_args
 from parse_var import parse_var
 import custom_eval
+
 file,lpbrk,LOOPLIMIT, debug  = load_args()
 
 def stop(msg):
@@ -16,6 +17,7 @@ def setvar(name,val):
   vars_[name] = val
 def getvar(name):
   return vars_[name]
+  
 def run(code):
   tokens = code.split("\n")
   
@@ -38,6 +40,10 @@ def run(code):
         setvar(name,custom_eval.custom_eval(v))
       else:
         setvar(name,pv)
+    elif tkn.startswith("import"):
+      nm = tkn.split(" ")[1]
+      with open(f"{nm}.ok",'r') as imp:
+        run(imp.read())
     elif tkn.startswith("call"):
       fnname =  tkn[tkn.index("call ")+4: tkn.index("(")].strip()
       args = tkn[tkn.index("(")+1: tkn.index(")")].split(',')
