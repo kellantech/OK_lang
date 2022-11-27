@@ -1,8 +1,7 @@
 import sys
 from get_args import load_args
 from parse_var import parse_var
-import custom_eval,parse_if
-
+import custom_eval,parse_if,cond_eval
 file,lpbrk,LOOPLIMIT, debug  = load_args()
 
 def stop(msg):
@@ -40,15 +39,29 @@ def run(code):
         setvar(name,custom_eval.custom_eval(v))
       else:
         setvar(name,pv)
+    elif tkn.startswith("while "):
+      st = tkn[tkn.index("{") + 1 : tkn.index("}")]
+      cond = tkn[tkn.index("(") + 1 : tkn.index(")")]
+      
+      while True:
+        for vn,vv in vars_.items():
+          c2 = cond
+          c2 = c2.replace(f"${vn}",str(vv))
+          
+        if cond_eval.eval_cond(c2):
+          for l2 in st.split(";"):
+            run(l2)
+        else:
+          break
+      
     elif tkn.startswith("if "):
       s = tkn
+      
+      
+      r,c = parse_if.parse(s)
       for vn,vv in vars_.items():
-        s = s.replace(f"${vn}",str(vv))
-      
-      r = parse_if.parse(s)
-      
-      if r != "":
-        
+        c = c.replace(f"${vn}",str(vv))
+      if cond_eval.eval_cond(c):
         for l in r.split(";"):
           run(l)
     elif tkn.startswith("import"):
