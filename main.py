@@ -1,7 +1,7 @@
 import sys
 from get_args import load_args
 from parse_var import parse_var
-import custom_eval
+import custom_eval,parse_if
 
 file,lpbrk,LOOPLIMIT, debug  = load_args()
 
@@ -19,9 +19,9 @@ def getvar(name):
   return vars_[name]
   
 def run(code):
-  tokens = code.split("\n")
+  lines = code.split("\n")
   
-  for tkn in tokens:
+  for tkn in lines:
     if tkn.startswith('var'):
       splt = tkn.split(" ",1)[1]
       name = (splt.split('=',1)[0].strip())
@@ -40,6 +40,17 @@ def run(code):
         setvar(name,custom_eval.custom_eval(v))
       else:
         setvar(name,pv)
+    elif tkn.startswith("if "):
+      s = tkn
+      for vn,vv in vars_.items():
+        s = s.replace(f"${vn}",str(vv))
+      
+      r = parse_if.parse(s)
+      
+      if r != "":
+        
+        for l in r.split(";"):
+          run(l)
     elif tkn.startswith("import"):
       nm = tkn.split(" ")[1]
       with open(f"{nm}.ok",'r') as imp:
