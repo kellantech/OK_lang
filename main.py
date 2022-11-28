@@ -2,6 +2,7 @@ import sys
 from get_args import load_args
 from parse_var import parse_var
 import custom_eval,parse_if,cond_eval
+
 file,lpbrk,LOOPLIMIT, debug  = load_args()
 
 def stop(msg):
@@ -18,8 +19,16 @@ def getvar(name):
   return vars_[name]
   
 def run(code):
+  if debug:
+    print("variables",end=":   ")
+    for _vn_,_vv_ in vars_.items():
+      print(f"{_vn_}:{_vv_}")
+    print()  
+    print("functions",end=":  ")
+    for _vn2_,_vv2_ in funcs.items():
+      print(f"{_vn2_}:{_vv2_}")
+    print()  
   lines = code.split("\n")
-  
   for tkn in lines:
     if tkn.startswith('var'):
       splt = tkn.split(" ",1)[1]
@@ -42,8 +51,10 @@ def run(code):
     elif tkn.startswith("while "):
       st = tkn[tkn.index("{") + 1 : tkn.index("}")]
       cond = tkn[tkn.index("(") + 1 : tkn.index(")")]
-      
+      lpctr = 0
       while True:
+        if lpbrk and lpctr > LOOPLIMIT-1:break
+        
         for vn,vv in vars_.items():
           c2 = cond
           c2 = c2.replace(f"${vn}",str(vv))
@@ -51,6 +62,7 @@ def run(code):
         if cond_eval.eval_cond(c2):
           for l2 in st.split(";"):
             run(l2)
+          lpctr += 1
         else:
           break
       
@@ -68,6 +80,7 @@ def run(code):
       nm = tkn.split(" ")[1]
       with open(f"{nm}.ok",'r') as imp:
         run(imp.read())
+        
     elif tkn.startswith("call"):
       fnname =  tkn[tkn.index("call ")+4: tkn.index("(")].strip()
       args = tkn[tkn.index("(")+1: tkn.index(")")].split(',')
@@ -76,10 +89,13 @@ def run(code):
       fn_args = funcs[fnname]["args"]
       for ar in range(len(fn_args)):
         arg = fn_args[ar]
+        if arg == '': continue
         cd = cd.replace("$"+arg,args[ar])
+      
+      
       for vrn,vrv in vars_.items():
         cd = cd.replace(f"${vrn}",str(vrv))  
       run(cd.replace(";","\n"))
       
-      
+    
 run(cde)
