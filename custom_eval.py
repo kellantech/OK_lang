@@ -1,15 +1,24 @@
-import string
-def custom_eval(ex):
-  global rm
-  rm = True
-  for c in ex:
+def custom_eval(inp):
+  def _if_int(x):
+    if "'" in x or '"' in x:
+      return x.replace("'",'').replace('"','')
+    else: return int(x)  
+      
+  op = ""
+  for c in inp:
+    if c in ['+','-','*','/']:
+      op = c
+  if op == "":
+    return inp
+  else:  
+    cd1 = inp.split(op)[0]
+    cd2 = inp.split(op)[1]
+    if op == "+":
+      return _if_int(cd1)+_if_int(cd2)
+    if op == "-":
+      return _if_int(cd1)-_if_int(cd2)
+    if op == "*":
+      return _if_int(cd1)*_if_int(cd2)
+    if op == "/":
+      return _if_int(cd1)/_if_int(cd2)
     
-    if c == "\"" or c == "'":
-      rm = not rm
-    elif rm:
-      if c in string.ascii_uppercase or c in string.ascii_lowercase:
-        ind = ex.index(c)
-        ex = ex[:ind] + ex[ind + 1:]
-  
-  return eval(ex)
-
