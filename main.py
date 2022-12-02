@@ -1,15 +1,18 @@
-import sys
+import sys,os
 from get_args import load_args
 from parse_var import parse_var
 import custom_eval,parse_if,cond_eval
+global lpbrk
+from OKDIR import OKLANG_DIR
 
-file,lpbrk,LOOPLIMIT, debug  = load_args()
+file,lpbrk_,LOOPLIMIT, debug  = load_args()
+ABSPATH = os.popen("pwd").read().replace("\n","")
 
 def stop(msg):
   print(msg)
   sys.exit()
 
-with open(file,'r') as file:
+with open(f"{ABSPATH}/{file}",'r') as file:
   cde = file.read()
 vars_ = { }  
 funcs = { }
@@ -19,6 +22,8 @@ def getvar(name):
   return vars_[name]
   
 def run(code):
+  global lpbrk
+  lpbrk = lpbrk_
   if debug:
     print("variables",end=":   ")
     for _vn_,_vv_ in vars_.items():
@@ -31,6 +36,7 @@ def run(code):
   lines = code.split("\n")
   for tkn in lines:
     if tkn.startswith('var'):
+    
       splt = tkn.split(" ",1)[1]
       name = (splt.split('=',1)[0].strip())
       val= (splt.split('=',1)[1].strip())
@@ -78,9 +84,14 @@ def run(code):
           run(l)
     elif tkn.startswith("import"):
       nm = tkn.split(" ")[1]
-      with open(f"{nm}.ok",'r') as imp:
-        run(imp.read())
-        
+      try:
+        pth = os.path.join(ABSPATH,f"{nm}.ok")
+        with open(f"{pth}",'r') as imp:
+          run(imp.read())
+      except FileNotFoundError:
+        pth2 = os.path.join(OKLANG_DIR,"stdlib",f"{nm}.ok")
+        with open(pth2,'r') as imp2:
+          run(imp2.read())
     elif tkn.startswith("call"):
       fnname =  tkn[tkn.index("call ")+4: tkn.index("(")].strip()
       args = tkn[tkn.index("(")+1: tkn.index(")")].split(',')
@@ -97,5 +108,4 @@ def run(code):
         cd = cd.replace(f"${vrn}",str(vrv))  
       run(cd.replace(";","\n"))
       
-    
 run(cde)
