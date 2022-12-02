@@ -1,0 +1,10 @@
+import sys
+
+var readfile = func(name){call system('cat $name');var _readfile_ =[$_system_]}
+
+
+var writefile = func(name,data){call system('echo $data > $name');var __ = evalpy("__import__('sys').stdout.flush()")}
+
+var delfile = func(name){var __ = evalpy("__import__('os').popen('rm $name')")}
+
+var newfile = func(name){var __ = evalpy("__import__('os').popen('touch $name')")}
