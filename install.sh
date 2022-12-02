@@ -1,4 +1,5 @@
 
+
 # python files
 echo -n "downloading main.py..."
 curl -O -s https://raw.githubusercontent.com/kellantech/OK_lang/main/main.py
@@ -60,3 +61,6 @@ echo "python3 $(pwd)/main.py \$@" >> oklang
 chmod +x oklang
 
 echo "done"
+
+
+echo "move file oklang to where you want to use OK Lang"
