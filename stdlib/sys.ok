@@ -1,0 +1,2 @@
+var system = func(cmd){var _system_ = evalpy("__import__('os').popen($cmd).read().replace('\n',' ').replace(chr(34),"").replace(chr(39),"")")}
+
