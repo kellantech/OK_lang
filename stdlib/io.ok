@@ -1,0 +1,3 @@
+var print = func(txt){var __ = evalpy("print($txt)");}
+var input = func(){var _input_ = evalpy("input()")}
+
